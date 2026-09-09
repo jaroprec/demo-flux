@@ -6,7 +6,7 @@ metadata:
 spec:
   chart:
     spec:
-      version: "2026.908.757"
+      version: "2026.909.651"
   values:
     config:
       environment: staging
