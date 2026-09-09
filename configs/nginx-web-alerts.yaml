@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: nginx-web
+  namespace: monitoring
+  labels:
+    # Matches the Prometheus ruleSelector of the kube-prometheus-stack release.
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: nginx-web
+      rules:
+        - alert: NginxWebUnavailable
+          expr: kube_deployment_status_replicas_available{namespace="demo",deployment="nginx-web"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: nginx-web has no available replicas
+            description: Deployment nginx-web in namespace demo has had 0 available replicas for more than 2 minutes.

@@ -1,0 +1,30 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+  namespace: monitoring
+spec:
+  interval: 30m
+  timeout: 20m
+  chart:
+    spec:
+      chart: kube-prometheus-stack
+      # version is set per cluster in ./overlays/<cluster>/kube-prometheus-stack.yaml
+      sourceRef:
+        kind: HelmRepository
+        name: prometheus-community
+        namespace: flux-system
+      interval: 24h
+  values:
+    crds:
+      enabled: true
+    alertmanager:
+      enabled: true
+    grafana:
+      enabled: true
+    prometheus:
+      prometheusSpec:
+        # Load PrometheusRules from any namespace, matched by the release label.
+        ruleNamespaceSelector: {}
+        serviceMonitorNamespaceSelector: {}
+        podMonitorNamespaceSelector: {}

@@ -1,0 +1,14 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: nginx-web
+  namespace: demo
+spec:
+  chart:
+    spec:
+      version: "2026.908.757"
+  values:
+    config:
+      environment: staging
+    ingress:
+      host: demo.local

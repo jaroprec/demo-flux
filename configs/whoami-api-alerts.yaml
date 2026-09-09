@@ -1,0 +1,20 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: whoami-api
+  namespace: monitoring
+  labels:
+    # Matches the Prometheus ruleSelector of the kube-prometheus-stack release.
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: whoami-api
+      rules:
+        - alert: WhoamiApiUnavailable
+          expr: kube_deployment_status_replicas_available{namespace="demo",deployment="whoami-api"} == 0
+          for: 2m
+          labels:
+            severity: critical
+          annotations:
+            summary: whoami-api has no available replicas
+            description: Deployment whoami-api in namespace demo has had 0 available replicas for more than 2 minutes.

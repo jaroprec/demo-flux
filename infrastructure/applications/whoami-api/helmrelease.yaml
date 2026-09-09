@@ -1,0 +1,20 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: whoami-api
+  namespace: demo
+spec:
+  interval: 10m
+  timeout: 10m
+  chart:
+    spec:
+      chart: whoami-api
+      # version is set per cluster in ./overlays/<cluster>/whoami-api.yaml
+      sourceRef:
+        kind: HelmRepository
+        name: ghcr-charts
+        namespace: flux-system
+      interval: 5m
+  values:
+    imagePullSecrets:
+      - name: ghcr-pull
