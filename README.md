@@ -1,8 +1,8 @@
-# jaro-testing-fluxcd
+# demo-flux
 
 Flux GitOps for the demo apps (`nginx-web` + `whoami-api`) and kube-prometheus-stack.
 
-App charts are published to `oci://ghcr.io/greenqloud/charts` (public; no pull secrets). Chart **versions** live in `overlays/` (not in the base HelmReleases). Alert `PrometheusRule`s live in `configs/` so they apply after Prometheus Operator CRDs exist.
+App charts are published to `oci://ghcr.io/jaroprec/charts` (public; no pull secrets). Chart **versions** live in `overlays/` (not in the base HelmReleases). Alert `PrometheusRule`s live in `configs/` so they apply after Prometheus Operator CRDs exist.
 
 ## Layout
 
