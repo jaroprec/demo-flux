@@ -22,5 +22,3 @@ spec:
     backend:
       serviceName: whoami-api
       servicePort: 80
-    imagePullSecrets:
-      - name: ghcr-pull
