@@ -6,6 +6,6 @@ metadata:
 spec:
   type: oci
   interval: 5m
-  url: oci://ghcr.io/greenqloud/charts
+  url: oci://ghcr.io/jaroprec/charts
   secretRef:
     name: ghcr-credentials
