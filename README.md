@@ -15,7 +15,7 @@ configs/                   # PrometheusRules (not inside app charts)
 
 Staging overlay currently pins:
 
-- `nginx-web` / `whoami-api` chart `2026.909.737`
+- `nginx-web` / `whoami-api` chart `2026.908.757`
 - `kube-prometheus-stack` `88.6.2`
 - Ingress host `demo.local`
 
@@ -29,22 +29,35 @@ minikube addons enable ingress
 minikube addons enable metrics-server   # optional; HPA likes it
 ```
 
-Install Flux:
+Install the Flux **CLI**, then Flux on the cluster (`flux install` is the same on every OS).
+
+macOS (Homebrew):
 
 ```bash
 brew install fluxcd/tap/flux
+```
+
+Linux: Homebrew works if you already use it (`brew install fluxcd/tap/flux`). Otherwise:
+
+```bash
+curl -s https://fluxcd.io/install.sh | sudo bash
+```
+
+Binaries: [fluxcd/flux2 releases](https://github.com/fluxcd/flux2/releases). Check with `flux version --client`.
+
+```bash
 flux install
 ```
 
 ## Point Flux at this repo
 
-`flux bootstrap` is normally not required for testing. A `GitRepository` plus two `Kustomization`s is enough; Flux will keep polling git and applying changes.
+`flux bootstrap` is not required. A `GitRepository` plus two `Kustomization`s is enough; Flux will keep polling git and applying changes.
 
 Replace the URL/branch if needed:
 
 ```bash
 flux create source git flux-system \
-  --url=https://github.com/jaroprec/demo-fluxcd \
+  --url=https://github.com/jaroprec/demo-flux \
   --branch=main \
   --interval=1m
 
@@ -107,11 +120,25 @@ kubectl -n demo exec deploy/nginx-web -- wget -qO- http://127.0.0.1:8080/api/
 
 `/` is the nginx page. `/api/` is proxied to `whoami-api` (you should see whoami headers).
 
-### Ingress on macOS (Docker driver)
+### Ingress (macOS and Linux)
 
-`minikube ip` and `minikube tunnel` usually **do not** expose the ingress addon. That controller is a **NodePort** Service; tunnel only publishes LoadBalancer IPs.
+Flux, in-cluster `wget`, and Grafana port-forward are the same on every OS. What differs is how the **laptop** reaches minikube Ingress.
 
-Use a port-forward to the controller and send the Ingress host:
+The ingress addon is a **NodePort** Service. `minikube tunnel` only publishes LoadBalancer IPs, on every OS.
+
+**macOS (Docker driver):** `minikube ip` is usually not reachable. Use a port-forward (below).
+
+**Linux:** with kvm2 / qemu / VirtualBox you can often skip the forward:
+
+```bash
+echo "$(minikube ip) demo.local" | sudo tee -a /etc/hosts
+curl -sS http://demo.local/
+curl -sS http://demo.local/api/
+```
+
+Browser: [http://demo.local/](http://demo.local/). With the **Docker** driver, try `minikube ip` first; if it hangs, use the same port-forward as on Mac.
+
+Port-forward to the controller (works on macOS and Linux):
 
 ```bash
 kubectl -n ingress-nginx get pods   # wait until Running
@@ -152,13 +179,17 @@ kube-prometheus-stack is in namespace `monitoring`. App alerts are `PrometheusRu
 kubectl -n monitoring get prometheusrule
 ```
 
-Grafana (change the password after first login):
+Grafana (same on macOS and Linux; change the password after first login):
 
 ```bash
 kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana 3000:80
-# admin / prom-operator (chart default unless overridden)
 ```
-Navigate to: [http://localhost:3000](http://localhost:3000)
+
+Open [http://localhost:3000](http://localhost:3000). Default user `admin`, password `prom-operator`. If that fails:
+
+```bash
+kubectl -n monitoring get secret kube-prometheus-stack-grafana -o jsonpath='{.data.admin-password}' | base64 -d; echo
+```
 
 ## Scratch / retry
 
